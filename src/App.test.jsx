@@ -1,0 +1,5 @@
+import {afterEach,describe,it,expect,vi} from 'vitest';import {cleanup,render,screen,fireEvent} from '@testing-library/react';import {MemoryRouter} from 'react-router-dom';import App from './App';import {AuthProvider} from './context/AuthContext';import api from './services/api';
+vi.mock('./services/api',()=>({default:{get:vi.fn(()=>Promise.reject(new Error('offline'))),post:vi.fn(),patch:vi.fn()}}));
+afterEach(cleanup);
+function mount(path='/'){return render(<MemoryRouter initialEntries={[path]}><AuthProvider><App/></AuthProvider></MemoryRouter>)}
+describe('HomeEase pages',()=>{it('shows the home page and navigation',()=>{mount();expect(screen.getByRole('heading',{name:/your home,/i})).toBeInTheDocument();expect(screen.getAllByRole('link',{name:/services/i}).length).toBeGreaterThan(0)});it('filters the service catalogue by search',async()=>{mount('/services');const input=screen.getByPlaceholderText('Search services');fireEvent.change(input,{target:{value:'plumbing'}});expect(await screen.findByRole('heading',{name:'Tap & faucet repair'})).toBeInTheDocument();expect(screen.queryByRole('heading',{name:'Fan installation'})).not.toBeInTheDocument()})});
